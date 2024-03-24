@@ -335,6 +335,10 @@ button {
   width: 100%;
   object-fit: cover;
 }
+.customSwiper {
+  height: auto; /* Adjust the height as needed */
+  width: auto;
+}
 
 .swiperSlideText {
   color: #ffffff;

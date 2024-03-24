@@ -1,7 +1,7 @@
 import { getAuth,updateProfile } from "firebase/auth"
-import {updateDoc,doc} from 'firebase/firestore'
+import {updateDoc,doc,deleteDoc,collection,query,where,orderBy, getDocs} from 'firebase/firestore'
 import { db } from "../firebase.config"
-import { useState} from "react"
+import { useState,useEffect} from "react"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -12,6 +12,8 @@ function Profile() {
   const auth = getAuth()
   const navigate = useNavigate()
   const [changeDetails,setChangeDetails]=useState(false)
+  const[listings,setListings]=useState(null)
+  const[loading,setLoading]=useState(true)
   const [formData,setFormData]=useState({
     name:auth.currentUser.displayName,
     email:auth.currentUser.email
@@ -22,6 +24,35 @@ function Profile() {
     auth.signOut()
     navigate('/')
   }
+
+useEffect(()=>{
+
+const fetchUserListings = async()=>{
+
+  const listingsRef = collection(db,'listings')
+
+  const q=query(listingsRef,where('useRef','==',auth.currentUser.uid),orderBy('timestamp','desc'))
+
+  const querySnap= await getDocs(q)
+
+  let listings = []
+
+
+  querySnap.forEach((doc)=>{
+
+    return listings.push({
+      id:doc.id,
+      data:doc.data()
+
+    })
+  })
+  setListings(listings)
+  setLoading(false)
+
+}
+fetchUserListings()
+}, [auth.currentUser.uid])
+
   const onSubmit = async ()=>{
     try {
       if(auth.currentUser.displayName !== name){
